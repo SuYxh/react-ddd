@@ -1,0 +1,144 @@
+
+
+
+```js
+// DDD 结构示例：React + TypeScript + Zustand
+// 项目结构如下：
+// src/
+// ├── features/
+// │   └── product/
+// │       ├── domain/                ← 实体、值对象、领域服务
+// │       │   ├── Product.ts
+// │       │   └── Price.ts
+// │       ├── application/           ← 应用服务、状态管理
+// │       │   └── useProductService.ts
+// │       ├── infrastructure/        ← API 请求
+// │       │   └── productApi.ts
+// │       └── ui/                    ← React 组件
+// │           └── ProductList.tsx
+// └── app/                           ← 应用入口与全局配置
+//     ├── store.ts
+//     └── App.tsx
+```
+
+
+
+
+
+------
+
+## 🧱 代码结构总览（示意）
+
+```
+src/
+├── features/
+│   └── product/
+│       ├── domain/              ← 领域模型层（Entity / ValueObject / DomainService）
+│       ├── application/         ← 应用服务层（ApplicationService）
+│       ├── infrastructure/      ← 基础设施层（Repository / API）
+│       └── ui/                  ← 表现层（React 组件）
+└── app/
+    └── App.tsx                 ← 系统入口，组合各个上下文
+```
+
+------
+
+## 🧭 逐层对应概念说明
+
+### 1️⃣ `domain/` ← DDD 中的 **领域层**
+
+| 文件         | DDD 对应概念           | 说明                                                         |
+| ------------ | ---------------------- | ------------------------------------------------------------ |
+| `Product.ts` | Entity（实体）         | 表示具有唯一 ID 的业务对象，例如 Product，有 `id` 和 `行为`（isAvailable） |
+| `Price.ts`   | Value Object（值对象） | 无 ID，只表示某种“业务属性值”，如货币金额、地址等，不可变、可复用 |
+
+✅ 领域模型中应包含**业务逻辑行为**，如 `Product.isAvailable()`，而不是简单数据结构。
+
+------
+
+### 2️⃣ `application/` ← DDD 中的 **应用服务层**
+
+| 文件                   | DDD 对应概念                                             | 说明                                                         |
+| ---------------------- | -------------------------------------------------------- | ------------------------------------------------------------ |
+| `useProductService.ts` | Application Service（应用服务） + 状态管理（如 Zustand） | 它协调调用领域模型、API、管理状态，不包含业务规则，仅封装**用例逻辑** |
+
+✅ 比如「获取所有商品」，就可以写成 `fetchAll()`。
+
+------
+
+### 3️⃣ `infrastructure/` ← DDD 中的 **基础设施层**
+
+| 文件            | DDD 对应概念              | 说明                                                         |
+| --------------- | ------------------------- | ------------------------------------------------------------ |
+| `productApi.ts` | Repository / 外部数据访问 | 负责从后端接口获取数据，并转成领域模型对象，如 `new Product(...)` |
+
+✅ 这里就是 API 与领域模型之间的桥梁，也可以添加 `saveProduct()` 等写入操作。
+
+------
+
+### 4️⃣ `ui/` ← DDD 中的 **接口层 / 表现层**
+
+| 文件              | DDD 对应概念               | 说明                                                         |
+| ----------------- | -------------------------- | ------------------------------------------------------------ |
+| `ProductList.tsx` | 表现层（Interface / View） | 纯粹负责渲染视图。组件内部调用 `Application Service` 来加载数据并展示。 |
+
+✅ 它**不关心业务规则**，只做展示用。如果用到复杂交互逻辑，也可以把 ViewModel 放在这一层中。
+
+------
+
+### 5️⃣ `features/` ← DDD 中的 **限界上下文（Bounded Context）**
+
+每一个 `features/product/` 模块，就相当于是 DDD 的一个 **限界上下文**，它有自己的：
+
+- 领域模型
+- 应用服务
+- 基础设施（如 API）
+- UI
+
+你也可以有：
+
+```
+features/user/
+features/order/
+features/inventory/
+```
+
+每个模块彼此**独立自治**，这样你就完成了 DDD 中的“限界上下文”划分。
+
+------
+
+## 🔄 对应 DDD 概念表格总结
+
+| 模块目录            | 示例文件               | DDD 概念            | 说明                             |
+| ------------------- | ---------------------- | ------------------- | -------------------------------- |
+| `domain/`           | `Product.ts`           | Entity              | 商品实体，带行为 `isAvailable()` |
+| `domain/`           | `Price.ts`             | Value Object        | 值对象，不可变的价格信息         |
+| `application/`      | `useProductService.ts` | Application Service | 协调领域模型与 API，管理状态     |
+| `infrastructure/`   | `productApi.ts`        | Repository/Adapter  | 实现数据访问逻辑，转成实体       |
+| `ui/`               | `ProductList.tsx`      | Interface Layer     | 展示产品信息，不含业务逻辑       |
+| `features/product/` | -                      | Bounded Context     | 产品模块的业务边界               |
+
+------
+
+## 🎯 这样分层的价值
+
+| 传统项目             | 使用 DDD 分层的好处            |
+| -------------------- | ------------------------------ |
+| 状态和逻辑混在组件里 | 状态独立于组件，可复用、可测试 |
+| API 数据裸用         | 明确建模，业务语义更清晰       |
+| 重复逻辑难复用       | 模型封装行为，复用更方便       |
+| 模块耦合难维护       | Bounded Context 自治，解耦     |
+
+------
+
+## 📦 下一步你可以做的事
+
+- ➕ 添加更多模块（user、cart、order）
+- 📤 用 Axios 真正发请求、落数据库
+- 🔍 添加测试（对领域模型/状态服务）
+- 🧪 引入领域事件（如 `ProductAddedToCart`）
+- 🌐 跨上下文用事件或接口连接多个模块
+
+------
+
+如果你愿意，我可以帮你继续扩展一个 `Cart` 模块，并加上事件机制或更完整的状态流。是否继续？
