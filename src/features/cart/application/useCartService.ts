@@ -6,25 +6,26 @@ import { PRODUCT_ADDED_TO_CART } from '../../../shared/domain-events/ProductAdde
 
 interface CartState {
   items: CartItem[];
-  addToCart: (product: Product) => void;
+  addToCart: (product: Product, level?: 'vip' | 'normal') => void;
   removeFromCart: (productId: string) => void;
   clearCart: () => void;
 }
 
 export const useCartService = create<CartState>((set, get) => ({
   items: [],
-  addToCart: (product) => {
+  addToCart: (product, level = 'normal') => {
     const existing = get().items.find((item) => item.product.id === product.id);
     if (existing) {
       set({
         items: get().items.map((item) =>
           item.product.id === product.id
-            ? new CartItem(product, item.quantity + 1)
+            ? new CartItem(product, item.quantity + 1, level)
             : item
         ),
       });
     } else {
-      set({ items: [...get().items, new CartItem(product)] });
+      // set({ items: [...get().items, new CartItem(product)] });
+      set({ items: [...get().items, new CartItem(product, 1, level)] });
     }
 
      // ✅ 发布领域事件

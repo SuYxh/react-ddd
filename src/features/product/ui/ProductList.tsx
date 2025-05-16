@@ -16,7 +16,7 @@ export const ProductList = () => {
         {products.map((product) => (
           <li key={product.id}>
             {product.name} - {product.price.toString()} {product.isAvailable() ? '✅' : '❌'}
-            <button onClick={() => addToCart(product)}>添加到购物车</button>
+            <button onClick={() => addToCart(product, 'vip')}>添加到购物车</button>
           </li>
         ))}
       </ul>
