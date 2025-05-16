@@ -1,4 +1,3 @@
-// ui/CartScanButton.tsx
 import { useCartScanWorkflow } from '../application/useCartScanWorkflow';
 
 export const CartScanButton = () => {
