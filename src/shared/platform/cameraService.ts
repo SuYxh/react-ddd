@@ -1,16 +1,7 @@
+import { createPlatformService } from './createPlatformService';
+
+// cameraService.ts
 export interface CameraService {
-  takePhoto(): Promise<Blob>;
+  takePhoto(): Promise<string>;
 }
-
-let cameraImpl: CameraService = {
-  takePhoto: async () => {
-    throw new Error('cameraService not implemented for current platform');
-  },
-};
-
-export const cameraService = {
-  takePhoto: () => cameraImpl.takePhoto(),
-  register(impl: CameraService) {
-    cameraImpl = impl;
-  },
-};
+export const cameraService = createPlatformService<CameraService>('cameraService');
